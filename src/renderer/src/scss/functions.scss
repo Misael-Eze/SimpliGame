@@ -1,0 +1,8 @@
+@function calcPixels( $target ) {
+
+    $vw_context: 1080;
+    $num_calc: calc( ($target * 100) / $vw_context ) * 1vw;
+
+    @return $num_calc;
+
+}

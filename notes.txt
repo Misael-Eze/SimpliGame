@@ -1,0 +1,38 @@
+visual
+
+== 1 ==
+. Escaneá el QR, completá tus datos, y jugá por un premio.
+. Una vez que completes tus datos, obtendrás un QR en tu celular, escaneálo en la parte inferior del totem y jugá (animación de flecha)
+
+
+== 2 ==
+(Una vez que el usuario escanea su QR)
+. opción 1:
+    . El SI verifica que el QR no se haya escaneado previamente
+    . El SI muestra las categorías y le pide al USER que seleccióne una categoría
+    . El USER seleccióna una categoría
+    . El SI muestra la pregunta de acuerdo a la categoría seleccionada
+
+. opción 2:
+    . El SI verifica que el QR no se haya escaneado previamente
+    . El SI informa que el QR ya fue escaneado con un mensaje (Lo sentimos, este QR ya fue escaneado previamente)
+
+
+
+=========================
+    FORMATO DEL EXCEL
+=========================
+
+Grupo: numero de grupo de la categoria, de "1...n"
+
+Categoria: nombre de la categoria
+
+Preguntas: pregunta para el grupo y categoria
+
+Respuesta: las diferentes opciones para las preguntas
+
+Correctas: "S" correcto - "N" incorrecto
+
+Explicación: un breve explicación de la respuesta correcta
+
+Color: color para la sección de esa categoria en formato hexadecimal "#e9edc9" -> https://convertacolor.com/
