@@ -2,62 +2,49 @@ import axios from "axios";
 import { reactive } from "vue";
 import App from "../app/app.provider";
 import Game from "../game/game.provider";
-import Visual from "../visual/visual.provider";
-
 
 const Qr = reactive({
-
     enable: true,
     value: 'https://leads.simplisales.com.ar/',
+    
+    // 🎯 Flag para comunicar detección de vale
+    valeDetected: false,
 
     message: {
         text: '',
-
         show(value: string): void {
-
             this.text = value;
             this.start();
-
         },
-
         start(): void {
-
             const i = document.getElementById('qr-message');
-
-            i!.style.display = 'flex';
-            i!.style.transform = 'scale(1)';
-            i!.style.opacity = '0';
-            i!.style.transition = '0s';
+            if (!i) return;
+            
+            i.style.display = 'flex';
+            i.style.transform = 'scale(1)';
+            i.style.opacity = '0';
+            i.style.transition = '0s';
 
             setTimeout(() => {
-
-                i!.style.transform = 'scale(1)';
-                i!.style.opacity = '1';
-                i!.style.transition = '.2s';
-                
+                i.style.transform = 'scale(1)';
+                i.style.opacity = '1';
+                i.style.transition = '.2s';
             }, 50);
 
             setTimeout(() => {
-
                 this.end();
-
             }, 5000);
-
         },
-
         end(): void {
-
             const i = document.getElementById('qr-message');
-
-            i!.style.transform = 'scale(1)';
-            i!.style.opacity = '0';
-
+            if (!i) return;
+            
+            i.style.transform = 'scale(1)';
+            i.style.opacity = '0';
             setTimeout(() => {
-                i!.style.display = 'none';
+                i.style.display = 'none';
             }, 200);
-
         },
-
     },
 
     codeBar: {
@@ -70,202 +57,169 @@ const Qr = reactive({
         }
     },
 
-    async scan1(value: string): Promise<void> {
-
-        // VERIFICAR QR
-        const data = this.isValid(value);
-        console.log(data);
-
-        if(data == null) {
-            console.log('qr inválido');
-            this.message.show('Lo sentimos, el código QR escaneado es inválido');
-            return;
-        }
-        // VERIFICAR QR
-
-
-        // VERIFICAR SI HAY PREMIOS
-        const statusStock = await Game.prize.checkStock();
-
-        if(!statusStock) {
-            console.log('no hay mas premios');
-            // this.message.show('Lo sentimos, este juego terminó');
-            this.enable = false;
-            return;
-        }
-        // VERIFICAR SI HAY PREMIOS
-
-
-        // VERIFICAR SI EL USUARIO YA JUGÓ
-        const statusPlayed = await this.ckeckUserPlayed(data.id);
-
-        if(statusPlayed) {
-            console.log('el usuario ya jugó');
-            this.message.show('Lo sentimos, el código QR ya fue escaneado anteriormente');
-            return;
-        }
-        // VERIFICAR SI EL USUARIO YA JUGÓ
-
-        Qr.codeBar.data.id = data.id;
-        Qr.codeBar.data.name = data.name;
-        Qr.codeBar.data.uuid = data.uuid;
-
-        Visual.idx = 1;
-        Game.start = true;
-
-        console.log('Hay premios?:', statusStock);
-        console.log('El usuario ya jugó?:', statusPlayed);
-        console.dir(JSON.stringify(data));
-
-    },
-
     async scan(value: string): Promise<void> {
-
-    // Check if it's a game ticket - if so, ignore here (customScan will handle it)
-    const normalizedValue = value.toUpperCase().trim();
-    if (normalizedValue.includes('VALEPORUNJUEGO')) {
-        console.log('Vale de juego detectado - dejando que customScan lo maneje');
-        return; // Exit early, don't process
-    }
-
-    // VERIFICAR QR
-    const data = this.isValid(value);
-    console.log(data);
-
-    if(data == null) {
-        console.log('qr inválido');
-        this.message.show('Lo sentimos, el código QR escaneado es inválido');
-        return;
-    }
-    
-    // Ya no verificas premios ni si jugó antes
-    // Solo guardas los datos y arrancas el juego
-    
-    Qr.codeBar.data.id = data.id;
-    Qr.codeBar.data.name = data.name;
-    Qr.codeBar.data.uuid = data.uuid;
-
-    Visual.idx = 1;
-    Game.start = true;
-
-    console.log('Usuario válido, iniciando juego');
-    console.dir(JSON.stringify(data));
-
-},
-
-    
-
-    async ckeckUserPlayed(id: string): Promise<boolean> {
-
-        let status = false
-
-        await axios.get(`${App.urlApi}/Players/GetById?Id=${id}`).then(res => {
-
-            console.dir(res);
-
-            if(res.data && res.data != null) {
-
-                if(res.data.id != null) status = true;
-
-            }
-
-        }).catch(err => {
-
-            console.dir(err);
-
-        })
-
-        return status;
-
-    },
-
-    isValid1(value: string): {id: string, name: string, uuid: string}|null {
-
-        let data: {id: string, name: string, uuid: string}|null;
-        const str = this.hexToString(value);
+        console.log('🔍 scan() llamado con:', value);
+        
+        // Validación básica
+        if (!value || typeof value !== 'string') {
+            console.log('❌ Valor inválido:', value);
+            return;
+        }
 
         try {
+            const raw = value.toString().trim();
+            console.log('📱 Valor raw:', raw);
 
-            data = JSON.parse(str);
-
-            if(data!['id'] == null || data!['id'] == undefined ||
-               data!['name'] == null || data!['name'] == undefined ||
-               data!['uuid'] == null || data!['uuid'] == undefined) {
-
-                data = null;
-
+            // 1) Detectar vale en texto plano (case insensitive)
+            const upperValue = raw.toUpperCase();
+            if (upperValue.includes('VALEPORUNJUEGO')) {
+                console.log('✅ Vale detectado (texto plano)');
+                this.valeDetected = true;
+                this.enable = false;
+                this.message.show('Vale detectado - iniciando juego');
+                return;
             }
 
-        }catch(err) {
+            // 2) Intentar decodificar como hexadecimal
+            const hexCandidate = raw.replace(/^0x/i, '');
+            if (/^[0-9a-fA-F]+$/.test(hexCandidate) && hexCandidate.length % 2 === 0) {
+                try {
+                    const decoded = this.hexToString(hexCandidate);
+                    console.log('🔓 Hex decodificado:', decoded);
+                    
+                    if (decoded && decoded.toUpperCase().includes('VALEPORUNJUEGO')) {
+                        console.log('✅ Vale detectado (hex)');
+                        this.valeDetected = true;
+                        this.enable = false;
+                        this.message.show('Vale detectado - iniciando juego');
+                        return;
+                    }
+                } catch (err) {
+                    console.log('⚠️ Error al decodificar hex:', err);
+                }
+            }
 
-            data = null;
-            console.log(err);
+            // 3) Intentar parsear como JSON (para QR de usuarios)
+            try {
+                const userData = JSON.parse(raw);
+                if (userData && userData.id && userData.name && userData.uuid) {
+                    console.log('👤 QR de usuario detectado:', userData);
+                    this.codeBar.data = userData;
+                    // Aquí podrías hacer algo con los datos del usuario si es necesario
+                    return;
+                }
+            } catch (err) {
+                // No es JSON válido, continuar
+            }
 
+            // 4) Intentar decodificar hex y parsear como JSON
+            if (/^[0-9a-fA-F]+$/.test(raw)) {
+                try {
+                    const decoded = this.hexToString(raw);
+                    const userData = JSON.parse(decoded);
+                    if (userData && userData.id && userData.name && userData.uuid) {
+                        console.log('👤 QR de usuario detectado (hex):', userData);
+                        this.codeBar.data = userData;
+                        return;
+                    }
+                } catch (err) {
+                    // No es un QR de usuario válido
+                }
+            }
+
+            // No se reconoció el QR
+            console.log('❌ QR no reconocido');
+            this.message.show('Código QR no reconocido. Por favor, escanea el vale del juego.');
+            
+        } catch (error) {
+            console.error('❌ Error en scan():', error);
+            this.message.show('Error al procesar el código QR');
         }
-
-        return data;
-
     },
-    isValid(value: string): {id: string, name: string, uuid: string}|null {
 
-    let data: {id: string, name: string, uuid: string}|null;
-    
-    // First check if it's a game ticket (plain text)
-    const normalizedValue = value.toUpperCase().trim();
-    if (normalizedValue.includes('VALEPORUNJUEGO')) {
-        // It's a game ticket, not user data - return null so it's handled elsewhere
-        console.log('Es un vale de juego, no datos de usuario');
-        return null;
-    }
-    
-    // Try to decode as hex and parse as JSON (for user QR codes)
-    const str = this.hexToString(value);
+    // Método para resetear después de jugar
+    resetVale(): void {
+        console.log('🔄 Reseteando vale');
+        this.valeDetected = false;
+        this.enable = true;
+    },
 
-    try {
+    async ckeckUserPlayed(id: string): Promise<boolean> {
+        let status = false;
+        try {
+            const res = await axios.get(`${App.urlApi}/Players/GetById?Id=${id}`);
+            if (res.data && res.data != null) {
+                if (res.data.id != null) status = true;
+            }
+        } catch (err) {
+            console.error('Error checking user:', err);
+        }
+        return status;
+    },
 
-        data = JSON.parse(str);
-
-        if(data!['id'] == null || data!['id'] == undefined ||
-           data!['name'] == null || data!['name'] == undefined ||
-           data!['uuid'] == null || data!['uuid'] == undefined) {
-
-            data = null;
-
+    isValid(value: string): {id: string, name: string, uuid: string} | null {
+        if (!value || typeof value !== 'string') {
+            return null;
         }
 
-    }catch(err) {
+        // Verificar si es un vale de juego
+        const normalizedValue = value.toUpperCase().trim();
+        if (normalizedValue.includes('VALEPORUNJUEGO')) {
+            console.log('Es un vale de juego, no datos de usuario');
+            return null;
+        }
+        
+        // Intentar decodificar como hex y parsear JSON
+        try {
+            const str = this.hexToString(value);
+            const data = JSON.parse(str);
+            
+            if (data && data.id && data.name && data.uuid) {
+                return data;
+            }
+        } catch (err) {
+            console.log('Error parsing user data:', err);
+        }
 
-        data = null;
-        console.log(err);
-
-    }
-
-    return data;
-
-},
+        return null;
+    },
 
     hexToString(hex: string): string {
-
-        var hex = hex.toString(); //force conversion
-        var str = '';
-        for (var i = 0; i < hex.length; i += 2)
-            str += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
+        if (!hex || typeof hex !== 'string') {
+            return '';
+        }
+        
+        let str = '';
+        try {
+            for (let i = 0; i < hex.length; i += 2) {
+                const charCode = parseInt(hex.substr(i, 2), 16);
+                if (!isNaN(charCode)) {
+                    str += String.fromCharCode(charCode);
+                }
+            }
+        } catch (err) {
+            console.error('Error in hexToString:', err);
+            return '';
+        }
         return str;
-
     },
     
     stringToHex(str: string): string {
-
-        var hex = '';
-
-        for(var i=0;i<str.length;i++)
-            hex += ''+str.charCodeAt(i).toString(16);
-
+        if (!str || typeof str !== 'string') {
+            return '';
+        }
+        
+        let hex = '';
+        try {
+            for (let i = 0; i < str.length; i++) {
+                hex += str.charCodeAt(i).toString(16);
+            }
+        } catch (err) {
+            console.error('Error in stringToHex:', err);
+            return '';
+        }
         return hex;
-
     }
+});
 
-})
-
-
-export default Qr
+export default Qr;

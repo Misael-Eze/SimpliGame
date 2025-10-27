@@ -20,14 +20,34 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, defineEmits, defineProps, ref } from 'vue'
+import { computed, defineEmits, defineProps, ref, onMounted, onUnmounted } from 'vue'
 
-
-const props = defineProps<{ areas: string[] }>()
+const props = defineProps<{ areas: string[], autoSpin?: boolean }>()
 const emits = defineEmits<{ (e: 'selected', index: number): void }>()
 
 const rotation = ref(0)
 const spinning = ref(false)
+
+// Escuchar evento de auto-giro
+onMounted(() => {
+  console.log('🎰 Ruleta lista para auto-giro')
+  try {
+    window.addEventListener('auto-spin', () => {
+      console.log('🎯 Evento auto-spin recibido en ruleta')
+      girar()
+    })
+  } catch (err) {
+    console.error('❌ Error al configurar auto-spin:', err)
+  }
+})
+
+onUnmounted(() => {
+  try {
+    window.removeEventListener('auto-spin', girar)
+  } catch (err) {
+    console.error('❌ Error al limpiar auto-spin:', err)
+  }
+})
 
 const angle = computed(() => (props.areas.length ? 360 / props.areas.length : 360))
 
@@ -60,19 +80,37 @@ function labelStyle(i: number) {
 }
 
 function girar() {
-  if (spinning.value) return
+  if (spinning.value) {
+    console.log('⏳ Ruleta ya está girando')
+    return
+  }
+  
+  console.log('🎰 Iniciando giro de ruleta')
   spinning.value = true
-  const randomSpin = 360 * 5 + Math.floor(Math.random() * 360)
+  
+  // Generar un giro aleatorio entre 5-7 vueltas completas
+  const vueltas = 5 + Math.floor(Math.random() * 3)
+  const randomSpin = 360 * vueltas + Math.floor(Math.random() * 360)
+  
+  console.log(`🎲 Girando ${vueltas} vueltas (${randomSpin}°)`)
   rotation.value += randomSpin
 }
 
 function onTransitionEnd() {
-  // only handle when we were spinning
+  // Solo procesar si estábamos girando
   if (!spinning.value) return
-  const normalized = ((rotation.value % 360) + 360) % 360
-  const idx = Math.floor(((360 - normalized) % 360) / angle.value)
-  spinning.value = false
-  emits('selected', idx)
+  
+  try {
+    const normalized = ((rotation.value % 360) + 360) % 360
+    const idx = Math.floor(((360 - normalized) % 360) / angle.value)
+    console.log('🎯 Ruleta detenida en:', props.areas[idx])
+    
+    spinning.value = false
+    emits('selected', idx)
+  } catch (err) {
+    console.error('❌ Error al procesar fin de giro:', err)
+    spinning.value = false
+  }
 }
 
 </script>

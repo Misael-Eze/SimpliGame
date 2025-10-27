@@ -1,7 +1,7 @@
 <script setup lang="ts">
 
-    import PlayersVue from '../players/players.vue'
-  
+//    import PlayersVue from '../players/players.vue'
+
 </script>
 
 
@@ -135,7 +135,7 @@
 
             </div>
 
-            <PlayersVue v-if="!Settings.pad.active"></PlayersVue>
+            <!-- <PlayersVue v-if="!Settings.pad.active"></PlayersVue> -->
 
         </div>
 

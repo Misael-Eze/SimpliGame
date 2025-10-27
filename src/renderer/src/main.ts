@@ -12,6 +12,15 @@ import Players from './views/players/players.provider'
 
 const app = createApp(MainVue)
 
+// Provide all providers for injection
+app.provide('Settings', Settings)
+app.provide('App', App)
+app.provide('Visual', Visual)
+app.provide('Wallpaper', Wallpaper)
+app.provide('Qr', Qr)
+app.provide('Categories', Categories)
+app.provide('Game', Game)
+app.provide('Players', Players)
 
 declare module '@vue/runtime-core' {
     interface ComponentCustomProperties {

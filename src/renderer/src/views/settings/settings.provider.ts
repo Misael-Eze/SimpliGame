@@ -84,7 +84,7 @@ const Settings = reactive({
 
     endCount(): void{
 
-        window.clearTimeout( Settings.timeout.object );
+        window.clearInterval( Settings.timeout.object );
         Settings.timeout.active = false;
         Settings.timeout.duration.current = 0;
 
@@ -92,9 +92,9 @@ const Settings = reactive({
 
     show(): void{
 
-       Settings.active = true;
-       Settings.pad.active = true;
-       Settings.pad.value = '';
+    Settings.active = true;
+    Settings.pad.active = true;
+    Settings.pad.value = '';
 
     },
 

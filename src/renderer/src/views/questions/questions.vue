@@ -5,18 +5,20 @@
       <li v-for="(option, index) in question.options" :key="index">
         <button 
           :class="['option-button', 
-                  answered && index === selectedIndex ? (
-                    index === question.correctIndex ? 'correct' : 'incorrect'
-                  ) : '']"
+                  answered && index === selectedIndex ? 'selected' : '',
+                  answered && index === question.correctIndex ? 'correct' : '',
+                  answered && index === selectedIndex && index !== question.correctIndex ? 'incorrect' : '']"
           @click="seleccionar(index)"
           :disabled="answered"
         >
           {{ option }}
+          <span v-if="answered && index === question.correctIndex" class="correct-mark">✓</span>
+          <span v-if="answered && index === selectedIndex && index !== question.correctIndex" class="incorrect-mark">✗</span>
         </button>
       </li>
     </ul>
-    <div v-if="answered" class="feedback">
-      {{ selectedIndex === question.correctIndex ? '¡Correcto!' : 'Incorrecto. Intenta de nuevo.' }}
+    <div v-if="answered" class="feedback" :class="selectedIndex === question.correctIndex ? 'feedback-correct' : 'feedback-incorrect'">
+      {{ selectedIndex === question.correctIndex ? '¡Correcto!' : 'Incorrecto. La respuesta correcta está marcada en verde.' }}
     </div>
   </div>
 </template>
@@ -95,16 +97,42 @@ function seleccionar(index: number) {
   opacity: 0.7;
 }
 
+.option-button {
+  position: relative;
+  padding-right: 3rem;  /* Espacio para el ícono */
+}
+
+.option-button.selected {
+  border-width: 2px;
+}
+
 .option-button.correct {
-  background: #4caf50;
-  color: white;
-  border-color: #45a049;
+  background: #e8f5e9;
+  color: #2e7d32;
+  border-color: #4caf50;
 }
 
 .option-button.incorrect {
-  background: #f44336;
-  color: white;
-  border-color: #da190b;
+  background: #ffebee;
+  color: #c62828;
+  border-color: #f44336;
+}
+
+.correct-mark, .incorrect-mark {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.correct-mark {
+  color: #4caf50;
+}
+
+.incorrect-mark {
+  color: #f44336;
 }
 
 .feedback {
@@ -114,6 +142,16 @@ function seleccionar(index: number) {
   text-align: center;
   font-weight: bold;
   animation: fadeIn 0.3s ease;
+}
+
+.feedback-correct {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.feedback-incorrect {
+  background: #ffebee;
+  color: #c62828;
 }
 
 @keyframes fadeIn {

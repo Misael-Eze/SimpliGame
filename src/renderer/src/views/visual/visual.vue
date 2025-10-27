@@ -9,7 +9,7 @@
 
 <template>
 
-     <div class="visual">
+    <div class="visual">
 
         <div
             class="visual-container"

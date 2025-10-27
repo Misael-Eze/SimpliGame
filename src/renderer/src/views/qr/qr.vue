@@ -34,7 +34,7 @@
 
     <div
         class="qr"
-        v-if="Qr.enable"
+        v-if="Qr.enable = true"
     >
 
         <div class="qr-main">
@@ -64,7 +64,7 @@
 
     </div>
 
-    <div
+    <!-- <div
         class="qr"
         v-else
     >
@@ -75,7 +75,7 @@
 
         </div>
 
-    </div>
+    </div> -->
 
 </template>
 
