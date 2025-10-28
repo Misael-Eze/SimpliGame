@@ -6,12 +6,14 @@ export interface Question {
 
 export interface Area {
   name: string;
+  icon?: string;
   questions: Question[];
 }
 
 const areas: Area[] = [
   {
     name: "Robotización",
+    icon: 'Robotizacion.svg',
     questions: [
       {
         question: "¿Cuántos robots BD Rowa™ hay en Argentina?",
@@ -24,7 +26,7 @@ const areas: Area[] = [
         correctIndex: 1,
       },
       {
-        question: "¿En cuánto tiempo promedio el robot BD Rowa™  dispensa un medicamento?",
+        question: "¿En cuánto tiempo promedio el robot BD Rowa™ dispensa un medicamento?",
         options: ["Entre 10 a 15 segundos", "Entre 20 a 25 segundos" , "Entre 8 a 10 segundos", "Entre 15 y 20 segundos"],
         correctIndex: 2,
       },
@@ -47,6 +49,7 @@ const areas: Area[] = [
   },
   {
     name: "Arquitectura",
+    icon: 'Arquitectura.svg',
     questions: [
       {
         question: " ¿Qué ventaja ofrece el almacenamiento automatizado del robot BD Rowa™ en cuanto a la organización de la farmacia?",
@@ -107,6 +110,7 @@ const areas: Area[] = [
   },
   {
     name: "Digitalización",
+    icon: 'Digitalizacion.svg',
     questions: [
       {
         question: "¿El sistema de turnos solo ofrece informes desactualizados?",
@@ -137,6 +141,7 @@ const areas: Area[] = [
   },
   {
     name: "Branding",
+    icon: 'Branding2.svg',
     questions: [
       {
         question: "¿Qué es el Branding?",
@@ -200,23 +205,9 @@ const areas: Area[] = [
       }
     ],
   },
-  // {
-  //   name: "Vending Machines",
-  //   questions: [
-  //     {
-  //       question: "",
-  //       options: ["", "", "", ""],
-  //       correctIndex: 0,
-  //     },
-  //     {
-  //       question: "¿",
-  //       options: ["", "", "", ""],
-  //       correctIndex: 0,
-  //     }
-  //   ],
-  // },
   {
-    name: "Atención al Cliente",
+    name: "Atencion al Cliente",
+    icon: 'Atencion.svg',
     questions: [
       {
         question: "¿Cuándo esta disponble el servicio de atención telefónica de Automatiza?",
@@ -237,6 +228,7 @@ const areas: Area[] = [
   },
   {
     name: "Comodin",
+    icon: 'Comodin.svg',
     questions: [
       {
         question: " ¿Qué función adicional puede ofrecer el robot BD Rowa™  que beneficia directamente a los pacientes?",
@@ -281,11 +273,11 @@ const areas: Area[] = [
       {
         question: "¿De qué forma se puede abastecer al robot BD Rowa™?",
         options: ["Automática", "Manual", "Online", "Manual y automática"],
-        correctIndex: 0,
+        correctIndex: 3,
       },
       {
         question: "¿Cómo se llama el complemento que se utiliza para cargar al robot BD Rowa™ de forma automática?",
-        options: ["BD Rowa ™ Picking Head", "BD Rowa ™ EasyLoad", "BD Rowa ™ Order Buffer", "BD Rowa ™ Dose"],
+        options: ["BD Rowa™ Picking Head", "BD Rowa™ EasyLoad", "BD Rowa™ Order Buffer", "BD Rowa™ Dose"],
         correctIndex: 1,
       },
       {

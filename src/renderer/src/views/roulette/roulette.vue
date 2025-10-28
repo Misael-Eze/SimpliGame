@@ -1,10 +1,16 @@
 <template>
   <div class="wheel-wrap">
     <div class="pointer"></div>
+
+    <!-- Mensaje de toque para girar -->
+    <div class="touch-hint" v-if="!hasSpun">
+      Toca la ruleta para que gire
+    </div>
+
+    <!-- Ruleta giratoria (colores + iconos dentro de cada sector) -->
     <div
       class="ruleta"
-      :style="{ transform: `rotate(${rotation}deg)`, background: gradient }
-      "
+      :style="{ transform: `rotate(${rotation}deg)`, background: gradient }"
       @click="girar"
       @transitionend="onTransitionEnd"
     >
@@ -14,6 +20,7 @@
         class="label"
         :style="labelStyle(i)"
       >
+        <img v-if="getIcon(area)" :src="getIcon(area) || undefined" class="sector-icon" :alt="getAreaName(area)" />
       </div>
     </div>
   </div>
@@ -22,11 +29,39 @@
 <script lang="ts" setup>
 import { computed, defineEmits, defineProps, ref, onMounted, onUnmounted } from 'vue'
 
-const props = defineProps<{ areas: string[], autoSpin?: boolean }>()
+type AreaInput = string | { name: string; icon?: string }
+const props = defineProps<{ areas: AreaInput[], autoSpin?: boolean }>()
 const emits = defineEmits<{ (e: 'selected', index: number): void }>()
 
 const rotation = ref(0)
 const spinning = ref(false)
+const hasSpun = ref(false)
+
+// Importa automáticamente todos los SVG del directorio de assets
+const iconModules = import.meta.glob('../../assets/*.svg', { eager: true, import: 'default' })
+
+// Genera un mapa { nombreSinExtension: ruta }
+const iconsByName: Record<string, string> = {}
+for (const path in iconModules) {
+  const fileName = path.split('/').pop()?.replace('.svg', '') || ''
+  iconsByName[fileName.toLowerCase()] = iconModules[path] as string
+}
+
+// Función auxiliar
+function normalizeName(name: string): string {
+  return name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/\s+/g, '')
+}
+
+function getAreaName(area: AreaInput) {
+  return typeof area === 'string' ? area : area.name
+}
+
+// Nuevo getIcon
+function getIcon(area: AreaInput): string | null {
+  const name = normalizeName(getAreaName(area))
+  return iconsByName[name] || null
+}
+
 
 // Escuchar evento de auto-giro
 onMounted(() => {
@@ -73,9 +108,9 @@ const gradient = computed(() => {
 
 function labelStyle(i: number) {
   const mid = angle.value * i + angle.value / 2
-  // place label outward from center
+  // place icon outward from center and let it rotate with the wheel
   return {
-    transform: `rotate(${mid}deg) translateY(-140px) rotate(${-mid}deg)`,
+    transform: `rotate(${mid}deg) translateY(-130px)`,
   }
 }
 
@@ -84,6 +119,9 @@ function girar() {
     console.log('⏳ Ruleta ya está girando')
     return
   }
+  
+  // Marcar que ya ha girado para ocultar el hint
+  hasSpun.value = true
   
   console.log('🎰 Iniciando giro de ruleta')
   spinning.value = true
@@ -120,7 +158,6 @@ function onTransitionEnd() {
   position: relative;
   width: min(90vw, 500px);
   height: min(90vw, 500px);
-  filter: drop-shadow(0 0 10px rgba(0,0,0,0.3));
 }
 
 @media (min-width: 1600px) {
@@ -138,26 +175,27 @@ function onTransitionEnd() {
 }
 
 .ruleta {
-  width: 100%;
-  height: 100%;
+  left: -31%;
+  width: 800px;
+  height: 800px;
   border-radius: 50%;
-  border: clamp(3px, 0.8vw, 6px) solid #333;
-  position: relative;
+  /* border: clamp(3px, 0.8vw, 6px) solid #333; */
+  position: absolute;
   transition: transform 4s cubic-bezier(0.25, 0.1, 0.25, 1);
   cursor: pointer;
   user-select: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   box-sizing: border-box;
   background-color: #fff;
+  z-index: 1;
 }
+
+/* labels-overlay removed: icons are now inside the rotating .ruleta */
 
 .pointer {
   position: absolute;
   top: clamp(-10px, -2.5vw, -25px);
   left: 41.7%;
-  transform: translateX(-60%);
+  transform: translateX(-50%);
   width: 0;
   height: 0;
   border-left: clamp(15px, 2vw, 25px) solid transparent;
@@ -174,33 +212,51 @@ function onTransitionEnd() {
   top: 50%;
   transform-origin: 0 0;
   pointer-events: none;
+  width: 0;
+  height: 0;
 }
 
-.label-pill {
-  display: inline-block;
-  font-weight: bold;
-  font-size: clamp(1rem, 2.5vw, 1.6rem);
-  color: #fff;
-  background: rgba(0,0,0,0.45);
-  border-radius: 2rem;
-  padding: 0.25em 1em;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.18);
-  white-space: nowrap;
-  text-shadow: 1px 1px 4px rgba(0,0,0,0.7);
-  letter-spacing: 0.04em;
+.sector-icon {
+  display: block;
+  width: clamp(44px, 6vw, 72px);
+  height: clamp(44px, 6vw, 72px);
+  object-fit: contain;
+  filter: drop-shadow(0 6px 10px rgba(0,0,0,0.32));
+  transform: translate(-50%, -200%);
+  /* allow icons to rotate with the wheel; no counter-rotation */
 }
 
 @media (max-width: 480px) {
-  .label-pill {
-    font-size: 0.9rem;
-    padding: 0.15em 0.6em;
+  .sector-icon {
+    width: clamp(30px, 12vw, 44px);
+    height: clamp(30px, 12vw, 44px);
   }
 }
 
 @media (min-width: 1600px) {
-  .label-pill {
-    font-size: 2.2rem;
-    padding: 0.4em 1.5em;
+  .sector-icon {
+    width: 96px;
+    height: 96px;
   }
+}
+
+.touch-hint {
+  position: absolute;
+  top: 180%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  padding: 12px 24px;
+  border-radius: 20px;
+  font-size: clamp(16px, 2.5vw, 24px);
+  z-index: 2;
+  pointer-events: none;
+  animation: fadeInOut 1.5s ease-in-out infinite;
+  white-space: nowrap;
+}
+
+@keyframes fadeInOut {
+  0%, 100% { opacity: 0.8; }
+  50% { opacity: 1; }
 }
 </style>

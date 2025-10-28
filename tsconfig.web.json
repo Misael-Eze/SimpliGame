@@ -11,10 +11,11 @@
     "baseUrl": ".",  
     "noUnusedLocals": false,
     "noUnusedParameters": false,
+    "module": "esnext",
+    "moduleResolution": "node",
+    "target": "esnext",
     "paths": {
-      "@renderer/*": [
-        "src/renderer/src/*"
-      ]
+      "@renderer/*": ["src/renderer/src/*"]
     }
   }
 }

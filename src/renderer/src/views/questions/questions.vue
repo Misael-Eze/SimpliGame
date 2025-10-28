@@ -43,7 +43,7 @@ function seleccionar(index: number) {
     answered.value = false
     selectedIndex.value = -1
     emits('answered', -1) // signal to parent to clear question
-  }, 2000)
+  }, 4000)
 }
 </script>
 
@@ -53,8 +53,9 @@ function seleccionar(index: number) {
   padding: clamp(1.5rem, 3vw, 2.5rem);
   border-radius: 1rem;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  max-width: 430px;
+  max-width: 1200px;
   width: 100%;
+  font-size: 2.5rem;
 }
 
 .question-title {

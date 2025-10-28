@@ -235,17 +235,17 @@ window.testInvalid = () => {
     <SettingsVue v-if="Settings?.active" />
     
     <!-- Logo arriba a la izquierda -->
-    <div class="logo-top-left" 
+    <!-- <div class="logo-top-left" 
       @touchstart="Settings?.startCount()" 
       @mousedown="Settings?.startCount()"
       @touchend="Settings?.endCount()"
       @mouseup="Settings?.endCount()"
     >
       <img src="../../assets/Isotipo en Blanco pleno.png" alt="Logo" />
-    </div>
+    </div>  -->
 
     <!-- Logo centrado abajo -->
-    <div class="logo-bottom-center"
+    <div class="logo-top-left"
       @touchstart="Settings?.startCount()" 
       @mousedown="Settings?.startCount()"
       @touchend="Settings?.endCount()"
@@ -260,32 +260,39 @@ window.testInvalid = () => {
         <!-- QR Scanner State -->
         <div v-show="gameState === 'qr-scan'" class="qr-section">
           <div class="instruction-box">
-            <h2 class="instruction-title">¡Juega con nosotros!</h2>
+            <h2 class="instruction-title">¡Juga con nosotros! 🎮</h2>
             
             <!-- Indicador de estado -->
             <!-- <div class="scanner-status" :class="{ active: scannerEnabled }">
               <div class="status-dot"></div>
               <span>{{ scannerEnabled ? 'Lector activo' : 'Lector deshabilitado' }}</span>
             </div> -->
+            <!-- <div class="step">
+                <span class="step-number">1</span>
+                <span class="step-text">Escanea este QR</span>
+            </div> -->
             
             <div class="step">
-              <span class="step-number">1</span>
-              <span class="step-text">Escanea este QR</span>
+                <span class="step-number">1</span>
+                <span class="step-text">Escanea este QR</span>
             </div>
-            
             <div class="qr-wrapper">
               <QrcodeVue />
             </div>
             
             <div class="instruction-steps">
+              <!-- <div class="step">
+                <span class="step-number">1</span>
+                <span class="step-text">Escanea este QR</span>
+              </div> -->
               <div class="step">
                 <span class="step-number">2</span>
                 <span class="step-text">Completa el formulario</span>
               </div>
               <div class="step">
                 <span class="step-number">3</span>
-                <span class="step-text">Muestra el QR del final del formulario en el lector del tótem</span>
-              </div>
+                <span class="step-text">Mostra el QR en el lector</span>
+              </div>  
               <div class="step">
                 <span class="step-number">4</span>
                 <span class="step-text">Disfruta del juego!</span>
@@ -293,13 +300,13 @@ window.testInvalid = () => {
             </div>
             
             <!-- Botón de testing (solo visible en desarrollo) -->
-            <button 
+              <!-- <button 
               @click="handleQrScan('VALEPORUNJUEGO')" 
               class="test-button"
               v-if="true"
             >
-              🧪 TEST: Simular Vale
-            </button>
+              🎯 Toca  para jugar
+            </button>    -->
           </div>
         </div>
 
@@ -312,7 +319,7 @@ window.testInvalid = () => {
           <!-- Ruleta -->
           <div v-show="gameState === 'spinning'" class="roulette-section">
             <Ruleta 
-              :areas="areas.map(a => a.name)" 
+              :areas="areas" 
               @selected="onSelected"
               :auto-spin="true"
             />
@@ -344,28 +351,29 @@ window.testInvalid = () => {
 
 .logo-top-left {
   position: fixed;
-  top: 1.5rem;
-  left: 1.5rem;
+  top: 2.5%;
+  left: 15%;
+  transform: translateX(-50%);
   z-index: 200;
   animation: fadeInLogo 1s ease forwards;
 
   img {
-    height: clamp(50px, 6vw, 90px);
+    height: clamp(220px, 12vw, 320px);
     width: auto;
-    filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.4));
+    filter: drop-shadow(0 2px 16px rgba(0, 0, 0, 0.4));
   }
 }
 
 .logo-bottom-center {
   position: fixed;
   bottom: 1.5rem;
-  left: 35%;
-  transform: translateX(-50%);
+  left: 33%;
+  top: 10%;
   z-index: 150;
   animation: fadeInLogo 1.5s ease forwards;
 
   img {
-    height: clamp(90px, 5vw, 80px);
+    height: clamp(150px, 5vw, 80px);
     width: auto;
     opacity: 0.9;
     transition: opacity 0.3s ease;
@@ -467,20 +475,21 @@ window.testInvalid = () => {
 }
 
 .test-button {
-  margin-top: 1.5rem;
-  padding: 0.8rem 1.5rem;
+  margin-top: 2.5rem;
+  padding: 2.5rem 5rem;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   border: none;
-  border-radius: 0.5rem;
-  font-size: 1rem;
-  font-weight: 600;
+  border-radius: 1.2rem;
+  font-size: 3rem;
+  font-weight: 700;
   cursor: pointer;
   transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 8px 32px rgba(102, 126, 234, 0.4);
   
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 8px 32px rgba(102, 126, 234, 0.4);
   }
   
   &:active {
